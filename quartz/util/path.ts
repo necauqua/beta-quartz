@@ -6,8 +6,6 @@ export const clone = rfdc()
 
 // this file must be isomorphic so it can't use node libs (e.g. path)
 
-export const QUARTZ = "quartz"
-
 /// Utility type to simulate nominal types in TypeScript
 type SlugLike<T> = string & { __brand: T }
 
@@ -60,6 +58,7 @@ function sluggify(s: string): string {
     )
     .join("/") // always use / as sep
     .replace(/\/$/, "")
+    .toLowerCase()
 }
 
 export function slugifyFilePath(fp: FilePath, excludeExt?: boolean): FullSlug {

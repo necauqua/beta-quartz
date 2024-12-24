@@ -17,7 +17,14 @@ import {
 import { Text, Graphics, Application, Container, Circle } from "pixi.js"
 import { Group as TweenGroup, Tween as Tweened } from "@tweenjs/tween.js"
 import { registerEscapeHandler, removeAllChildren } from "./util"
-import { FullSlug, SimpleSlug, getFullSlug, resolveRelative, simplifySlug } from "../../util/path"
+import {
+  FullSlug,
+  SimpleSlug,
+  getFullSlug,
+  resolveRelative,
+  simplifySlug,
+  stripSlashes,
+} from "../../util/path"
 import { D3Config } from "../Graph"
 
 type GraphicsInfo = {
@@ -92,14 +99,22 @@ async function renderGraph(container: string, fullSlug: FullSlug) {
   } = JSON.parse(graph.dataset["cfg"]!) as D3Config
 
   const data: Map<SimpleSlug, ContentDetails> = new Map(
-    Object.entries<ContentDetails>(await fetchData).map(([k, v]) => [
-      simplifySlug(k as FullSlug),
-      v,
-    ]),
+    Object.entries<ContentDetails>(await fetchData).map(([k, v]) => {
+      const simplified = simplifySlug(k as FullSlug)
+      const slug = simplified == "/" ? "/" : stripSlashes(simplified)
+      return [slug as SimpleSlug, v]
+    }),
   )
   const links: SimpleLinkData[] = []
   const tags: SimpleSlug[] = []
   const validLinks = new Set(data.keys())
+
+  const aliases = new Map<SimpleSlug, SimpleSlug>()
+  for (const [slug, details] of data.entries()) {
+    for (const alias of details.aliases) {
+      aliases.set(simplifySlug(alias), slug)
+    }
+  }
 
   const tweens = new Map<string, TweenNode>()
   for (const [source, details] of data.entries()) {
@@ -108,6 +123,10 @@ async function renderGraph(container: string, fullSlug: FullSlug) {
     for (const dest of outgoing) {
       if (validLinks.has(dest)) {
         links.push({ source: source, target: dest })
+      }
+      const aliased = aliases.get(dest)
+      if (aliased) {
+        links.push({ source: source, target: aliased })
       }
     }
 

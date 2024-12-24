@@ -14,6 +14,7 @@ import { Features, transform } from "lightningcss"
 import { transform as transpile } from "esbuild"
 import { write } from "./helpers"
 import DepGraph from "../../depgraph"
+import path from "path"
 
 type ComponentResources = {
   css: string[]
@@ -122,12 +123,14 @@ function addGlobalPageResources(ctx: BuildCtx, componentResources: ComponentReso
     `)
   } else if (cfg.analytics?.provider === "goatcounter") {
     componentResources.afterDOMLoaded.push(`
-      const goatcounterScript = document.createElement("script")
-      goatcounterScript.src = "${cfg.analytics.scriptSrc ?? "https://gc.zgo.at/count.js"}"
-      goatcounterScript.async = true
-      goatcounterScript.setAttribute("data-goatcounter",
-        "https://${cfg.analytics.websiteId}.${cfg.analytics.host ?? "goatcounter.com"}/count")
-      document.head.appendChild(goatcounterScript)
+      document.addEventListener("nav", () => {
+        const goatcounterScript = document.createElement("script")
+        goatcounterScript.src = "${cfg.analytics.scriptSrc ?? "https://gc.zgo.at/count.js"}"
+        goatcounterScript.async = true
+        goatcounterScript.setAttribute("data-goatcounter",
+          "https://${cfg.analytics.websiteId}.${cfg.analytics.host ?? "goatcounter.com"}/count")
+        document.head.appendChild(goatcounterScript)
+      })
     `)
   } else if (cfg.analytics?.provider === "posthog") {
     componentResources.afterDOMLoaded.push(`
@@ -183,8 +186,13 @@ export const ComponentResources: QuartzEmitterPlugin = () => {
     getQuartzComponents() {
       return []
     },
-    async getDependencyGraph(_ctx, _content, _resources) {
-      return new DepGraph<FilePath>()
+    async getDependencyGraph(ctx, _content, _resources) {
+      const graph = new DepGraph<FilePath>()
+      graph.addEdge(
+        path.join(ctx.argv.output, "index.css") as FilePath,
+        path.join(process.cwd(), "styles.scss") as FilePath,
+      )
+      return graph
     },
     async emit(ctx, _content, _resources): Promise<FilePath[]> {
       const promises: Promise<FilePath>[] = []
@@ -245,6 +253,7 @@ export const ComponentResources: QuartzEmitterPlugin = () => {
         googleFontsStyleSheet,
         ...componentResources.css,
         styles,
+        await import("$styles").then((s) => s.default ?? s).catch(() => ""),
       )
       const [prescript, postscript] = await Promise.all([
         joinScripts(componentResources.beforeDOMLoaded),
