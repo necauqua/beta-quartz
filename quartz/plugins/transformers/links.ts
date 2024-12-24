@@ -58,6 +58,7 @@ export const CrawlLinks: QuartzTransformerPlugin<Partial<Options>> = (userOpts) 
           return (tree: Root, file) => {
             const curSlug = simplifySlug(file.data.slug!)
             const outgoing: Set<SimpleSlug> = new Set()
+            const linkTitles: Record<SimpleSlug, string> = {}
 
             const transformOptions: TransformOptions = {
               strategy: opts.markdownLinkResolution,
@@ -100,12 +101,15 @@ export const CrawlLinks: QuartzTransformerPlugin<Partial<Options>> = (userOpts) 
                 }
 
                 // Check if the link has alias text
+                let title = dest as string
                 if (
                   node.children.length === 1 &&
                   node.children[0].type === "text" &&
-                  node.children[0].value !== dest
+                  (title = node.children[0].value) !== dest
                 ) {
                   // Add the 'alias' class if the text content is not the same as the href
+                  // FIXME: to determine if this is an alias, we are comparing link text to href, but href is slugified
+                  // so this adds alias class for all links with spaces, for example
                   classes.push("alias")
                 }
                 node.properties.className = classes
@@ -126,6 +130,7 @@ export const CrawlLinks: QuartzTransformerPlugin<Partial<Options>> = (userOpts) 
                   const full = getFullInternalLink(dest, curSlug)
                   const simple = simplifySlug(full)
                   outgoing.add(simple)
+                  linkTitles[simple] = title
                   node.properties["data-slug"] = full
                 }
 
@@ -185,10 +190,12 @@ export const CrawlLinks: QuartzTransformerPlugin<Partial<Options>> = (userOpts) 
                 const full = getFullInternalLink(dest, curSlug)
                 const simple = simplifySlug(full)
                 outgoing.add(simple)
+                linkTitles[simple] = fp
               }
             }
 
             file.data.links = [...outgoing]
+            file.data.linkTitles = linkTitles
           }
         },
       ]
@@ -199,5 +206,6 @@ export const CrawlLinks: QuartzTransformerPlugin<Partial<Options>> = (userOpts) 
 declare module "vfile" {
   interface DataMap {
     links: SimpleSlug[]
+    linkTitles: Record<SimpleSlug, string>
   }
 }

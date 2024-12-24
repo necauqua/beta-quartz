@@ -9,4 +9,9 @@ interface CustomEventMap {
   themechange: CustomEvent<{ theme: "light" | "dark" }>
 }
 
+type ContentIndex = Record<
+  import("./quartz/util/path").FullSlug,
+  Omit<import("./quartz/plugins/emitters/contentIndex").ContentDetails, "description" | "date">
+>
+
 declare const fetchData: Promise<ContentIndex>
