@@ -52,9 +52,9 @@ export function getAliasSlugs(aliases: string[], argv: Argv, file: VFile): FullS
   if (typeof permalink === "string") {
     slugs.push(permalink as FullSlug)
   }
-  // fix any slugs that have trailing slash
-  return slugs.map((slug) =>
-    slug.endsWith("/") ? (joinSegments(slug, "index") as FullSlug) : slug,
+  // fix any slugs that have trailing slash and make sure they are lowercase
+  return slugs.map(
+    (slug) => (slug.endsWith("/") ? joinSegments(slug, "index") : slug).toLowerCase() as FullSlug,
   )
 }
 
