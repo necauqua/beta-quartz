@@ -35,7 +35,7 @@ import {
 
 /**
  * Handles `npx quartz create`
- * @param {*} argv arguments for `create`
+ * @param {import('yargs').InferredOptionTypes<typeof CreateArgv>} argv arguments for `create`
  */
 export async function handleCreate(argv) {
   console.log()
@@ -213,7 +213,7 @@ See the [documentation](https://quartz.jzhao.xyz) for how to get started.
 
 /**
  * Handles `npx quartz build`
- * @param {*} argv arguments for `build`
+ * @param {import('yargs').InferredOptionTypes<typeof import('./args').BuildArgv>} argv arguments for `build`
  */
 export async function handleBuild(argv) {
   console.log(chalk.bgGreen.black(`\n Quartz v${version} \n`))
@@ -447,7 +447,7 @@ export async function handleBuild(argv) {
 
 /**
  * Handles `npx quartz update`
- * @param {*} argv arguments for `update`
+ * @param {import('yargs').InferredOptionTypes<typeof import('./args').CommonArgv>} argv arguments for `update`
  */
 export async function handleUpdate(argv) {
   const contentFolder = path.join(cwd, argv.directory)
@@ -499,7 +499,7 @@ export async function handleUpdate(argv) {
 
 /**
  * Handles `npx quartz restore`
- * @param {*} argv arguments for `restore`
+ * @param {import('yargs').InferredOptionTypes<typeof import('./args').CommonArgv>} argv arguments for `restore`
  */
 export async function handleRestore(argv) {
   const contentFolder = path.join(cwd, argv.directory)
@@ -508,7 +508,7 @@ export async function handleRestore(argv) {
 
 /**
  * Handles `npx quartz sync`
- * @param {*} argv arguments for `sync`
+ * @param {import('yargs').InferredOptionTypes<typeof import('./args').SyncArgv>} argv arguments for `sync`
  */
 export async function handleSync(argv) {
   const contentFolder = path.join(cwd, argv.directory)

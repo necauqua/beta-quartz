@@ -1,4 +1,4 @@
-export const CommonArgv = {
+export const CommonArgv = /** @type {const} */ ({
   directory: {
     string: true,
     alias: ["d"],
@@ -11,9 +11,9 @@ export const CommonArgv = {
     default: false,
     describe: "print out extra logging information",
   },
-}
+})
 
-export const CreateArgv = {
+export const CreateArgv = /** @type {const} */ ({
   ...CommonArgv,
   source: {
     string: true,
@@ -32,9 +32,9 @@ export const CreateArgv = {
     choices: ["absolute", "shortest", "relative"],
     describe: "strategy to resolve links",
   },
-}
+})
 
-export const SyncArgv = {
+export const SyncArgv = /** @type {const} */ ({
   ...CommonArgv,
   commit: {
     boolean: true,
@@ -56,9 +56,9 @@ export const SyncArgv = {
     default: true,
     describe: "pull updates from your Quartz fork",
   },
-}
+})
 
-export const BuildArgv = {
+export const BuildArgv = /** @type {const} */ ({
   ...CommonArgv,
   output: {
     string: true,
@@ -105,4 +105,4 @@ export const BuildArgv = {
     number: true,
     describe: "how many threads to use to parse notes",
   },
-}
+})
