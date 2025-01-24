@@ -17,7 +17,14 @@ import {
 import { Text, Graphics, Application, Container, Circle } from "pixi.js"
 import { Group as TweenGroup, Tween as Tweened } from "@tweenjs/tween.js"
 import { registerEscapeHandler, removeAllChildren } from "./util"
-import { FullSlug, SimpleSlug, getFullSlug, resolveRelative, simplifySlug } from "../../util/path"
+import {
+  FullSlug,
+  SimpleSlug,
+  getFullSlug,
+  resolveRelative,
+  simplifySlug,
+  stripSlashes,
+} from "../../util/path"
 import { D3Config } from "../Graph"
 
 type GraphicsInfo = {
@@ -92,10 +99,11 @@ async function renderGraph(container: string, fullSlug: FullSlug) {
   } = JSON.parse(graph.dataset["cfg"]!) as D3Config
 
   const data: Map<SimpleSlug, ContentDetails> = new Map(
-    Object.entries<ContentDetails>(await fetchData).map(([k, v]) => [
-      simplifySlug(k as FullSlug),
-      v,
-    ]),
+    Object.entries<ContentDetails>(await fetchData).map(([k, v]) => {
+      const simplified = simplifySlug(k as FullSlug)
+      const slug = simplified == "/" ? "/" : stripSlashes(simplified)
+      return [slug as SimpleSlug, v]
+    }),
   )
   const links: SimpleLinkData[] = []
   const tags: SimpleSlug[] = []

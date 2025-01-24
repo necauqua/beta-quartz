@@ -114,7 +114,11 @@ export const TagPage: QuartzEmitterPlugin<Partial<TagPageOptions>> = (userOpts) 
 
       for (const tag of tags) {
         const slug = joinSegments("tags", tag) as FullSlug
-        const [tree, file] = tagDescriptions[tag]
+
+        const desc = tagDescriptions[tag]
+        content.push(desc) // make sure index knows about those pages
+        const [tree, file] = desc
+
         const externalResources = pageResources(pathToRoot(slug), file.data, resources)
         const componentData: QuartzComponentProps = {
           ctx,
@@ -126,10 +130,10 @@ export const TagPage: QuartzEmitterPlugin<Partial<TagPageOptions>> = (userOpts) 
           allFiles,
         }
 
-        const content = renderPage(cfg, slug, componentData, opts, externalResources)
+        const rendered = renderPage(cfg, slug, componentData, opts, externalResources)
         const fp = await write({
           ctx,
-          content,
+          content: rendered,
           slug: file.data.slug!,
           ext: ".html",
         })

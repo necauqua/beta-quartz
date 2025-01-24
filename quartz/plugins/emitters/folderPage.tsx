@@ -106,7 +106,11 @@ export const FolderPage: QuartzEmitterPlugin<Partial<FolderPageOptions>> = (user
 
       for (const folder of folders) {
         const slug = joinSegments(folder, "index") as FullSlug
-        const [tree, file] = folderDescriptions[folder]
+
+        const desc = folderDescriptions[folder]
+        content.push(desc) // make sure index knows about those pages
+        const [tree, file] = desc
+
         const externalResources = pageResources(pathToRoot(slug), file.data, resources)
         const componentData: QuartzComponentProps = {
           ctx,
@@ -118,10 +122,10 @@ export const FolderPage: QuartzEmitterPlugin<Partial<FolderPageOptions>> = (user
           allFiles,
         }
 
-        const content = renderPage(cfg, slug, componentData, opts, externalResources)
+        const rendered = renderPage(cfg, slug, componentData, opts, externalResources)
         const fp = await write({
           ctx,
-          content,
+          content: rendered,
           slug,
           ext: ".html",
         })
