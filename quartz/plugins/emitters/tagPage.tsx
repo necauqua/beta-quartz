@@ -117,8 +117,13 @@ export const TagPage: QuartzEmitterPlugin<Partial<TagPageOptions>> = (userOpts) 
           continue
         }
         desc.content = [tree, file]
-        if (file.data.frontmatter?.title === desc.tag) {
-          file.data.frontmatter.title = `${i18n(cfg.locale).pages.tagContent.tag}: ${desc.tag}`
+
+        // if the title was *not* set explicitly, update it to be consistent with virtual tag pages
+        // (to have the `Tag: ` prefix)
+        if (!file.data.frontmatterRaw?.title && !file.data.tagTitleFixed) {
+          file.data.tagTitleFixed = true
+          const f = (file.data.frontmatter ||= {} as any)
+          f.title = `${i18n(cfg.locale).pages.tagContent.tag}: ${f.title ?? desc.tag}`
         }
         if (!tagFolder && file.data.relativePath) {
           tagFolder = file.data.relativePath.split("/").at(0)
@@ -163,5 +168,11 @@ export const TagPage: QuartzEmitterPlugin<Partial<TagPageOptions>> = (userOpts) 
       }
       return fps
     },
+  }
+}
+
+declare module "vfile" {
+  interface DataMap {
+    tagTitleFixed?: true
   }
 }
